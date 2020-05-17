@@ -57,6 +57,9 @@ app.use(routerSettingsService);
 const routerUserService = require('./routes/user');
 app.use(routerUserService);
 
+const routerTaskService = require('./routes/task');
+app.use(routerTaskService);
+
 
 app.listen(3030, () => {
     console.log('Server is up and listening on 3030...');

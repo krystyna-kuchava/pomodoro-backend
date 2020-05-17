@@ -34,7 +34,7 @@ router.post(ROUTES.USER.SIGN_UP, (req, res) => {
 
                                 if (!doc.exists) {
                                     res.status(STATUSES.NOT_FOUND).send({
-                                        errorMessage: 'User did not added'
+                                        errorMessage: 'User was not created'
                                     });
                                 } else {
                                     const user = doc.data();
@@ -108,16 +108,5 @@ router.get(ROUTES.USER.USER, verifyToken, (req, res) => {
         }
     });
 });
-
-/*router.put('/settings', (req, res) => {
-    const settingDoc = getSettingsDoc();
-
-    settingDoc.update(() => {
-
-    }).then((doc) => {
-        const settings = doc.data();
-        res.json(settings);
-    });
-});*/
 
 module.exports = router;

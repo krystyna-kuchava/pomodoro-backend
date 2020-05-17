@@ -10,10 +10,6 @@ const TOKEN_CONFIG = require('../configs/tokenConfig');
 
 const router = express.Router();
 
-function getSettingsDoc() {
-    return db.collection(COLLECTIONS.SETTINGS).doc('08oJMf3yyrX56VFyFvWG');
-}
-
 router.get(ROUTES.SETTINGS, verifyToken, (req, res) => {
     jwt.verify(req.token, TOKEN_CONFIG.tokenType, (err, authData) => {
         if (err) {
