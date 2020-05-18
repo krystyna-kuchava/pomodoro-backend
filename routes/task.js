@@ -6,6 +6,7 @@ const STATUSES = require('../constants/statuses');
 const ROUTES = require('../constants/routes');
 const COLLECTIONS = require('../constants/collections');
 const TOKEN_CONFIG = require('../configs/tokenConfig');
+const TASK_STATUSES = require('../constants/task');
 
 const router = express.Router();
 
@@ -82,12 +83,53 @@ router.put(ROUTES.TASK.TASK_BY_ID, verifyToken, (req, res) => {
                 categoryId: req.body.categoryId,
                 priorityId: req.body.priorityId,
                 estimation: req.body.estimation,
-                deadlineDate: req.body.deadlineDate
+                deadlineDate: req.body.deadlineDate,
+                status: req.body.status
             };
 
             db.collection(COLLECTIONS.TASKS).doc(taskId).update(updatedTaskData).then(() => {
                 res.status(STATUSES.OK).send({
                     successMessage: 'Task was edited'
+                });
+            });
+        }
+    });
+});
+
+router.put(ROUTES.TASK.TASK_TODO, verifyToken, (req, res) => {
+    jwt.verify(req.token, TOKEN_CONFIG.tokenType, (err, authData) => {
+        if (err) {
+            res.sendStatus(STATUSES.FORBIDDEN);
+        } else {
+            const taskId = req.params.taskId;
+
+            const updatedTaskData = {
+                status: 'TODO_LIST'
+            };
+
+            db.collection(COLLECTIONS.TASKS).doc(taskId).update(updatedTaskData).then(() => {
+                res.status(STATUSES.OK).send({
+                    successMessage: 'Task was moved'
+                });
+            });
+        }
+    });
+});
+
+router.put(ROUTES.TASK.TASK_DONE, verifyToken, (req, res) => {
+    jwt.verify(req.token, TOKEN_CONFIG.tokenType, (err, authData) => {
+        if (err) {
+            res.sendStatus(STATUSES.FORBIDDEN);
+        } else {
+            const taskId = req.params.taskId;
+
+            const updatedTaskData = {
+                status: 'DONE_LIST'
+            };
+
+            db.collection(COLLECTIONS.TASKS).doc(taskId).update(updatedTaskData).then(() => {
+                res.status(STATUSES.OK).send({
+                    successMessage: 'Task was done'
                 });
             });
         }
@@ -110,23 +152,86 @@ router.delete(ROUTES.TASK.TASK_BY_ID, verifyToken, (req, res) => {
     });
 });
 
-router.get(ROUTES.TASK.TASKS_TODAY, verifyToken, (req, res) => {
+router.get(ROUTES.TASK.TASKS_BY_STATUS, verifyToken, (req, res) => {
+    let tasksStatus;
+
+    switch (req.params.status) {
+        case 'global':
+            tasksStatus = 'GLOBAL_LIST';
+            break;
+        case 'todo':
+            tasksStatus = 'TODO_LIST';
+            break;
+        case 'done':
+            tasksStatus = 'DONE_LIST';
+            break;
+        default:
+            tasksStatus = 'GLOBAL_LIST';
+    }
+
     jwt.verify(req.token, TOKEN_CONFIG.tokenType, (err, authData) => {
         if (err) {
             res.sendStatus(STATUSES.FORBIDDEN);
         } else {
-            const categoryId = req.params.categoryId;
+            const workTasks = db.collection(COLLECTIONS.TASKS)
+                .where('status', '==', TASK_STATUSES.STATUSES[tasksStatus])
+                .where('categoryId', '==', TASK_STATUSES.CATEGORIES.WORK)
+                .get();
 
-            db.collection(COLLECTIONS.TASKS).where('categoryId', '==', categoryId).get().then((snapshot) => {
-                console.log(snapshot);
+            const sportTasks = db.collection(COLLECTIONS.TASKS)
+                .where('status', '==', TASK_STATUSES.STATUSES[tasksStatus])
+                .where('categoryId', '==', TASK_STATUSES.CATEGORIES.SPORT)
+                .get();
 
-                res.status(STATUSES.OK).send({
-                    successMessage: 'Task was deleted'
-                });
+            const studyingTasks = db.collection(COLLECTIONS.TASKS)
+                .where('status', '==', TASK_STATUSES.STATUSES[tasksStatus])
+                .where('categoryId', '==', TASK_STATUSES.CATEGORIES.STUDYING)
+                .get();
+
+            const hobbyTasks = db.collection(COLLECTIONS.TASKS)
+                .where('status', '==', TASK_STATUSES.STATUSES[tasksStatus])
+                .where('categoryId', '==', TASK_STATUSES.CATEGORIES.HOBBY)
+                .get();
+
+            const otherTasks = db.collection(COLLECTIONS.TASKS)
+                .where('status', '==', TASK_STATUSES.STATUSES[tasksStatus])
+                .where('categoryId', '==', TASK_STATUSES.CATEGORIES.OTHER)
+                .get();
+
+            Promise.all([workTasks, sportTasks, studyingTasks, hobbyTasks, otherTasks]).then(resultsSnapshot => {
+                if (resultsSnapshot.empty) {
+                    res.status(STATUSES.OK).send({
+                        successMessage: 'No tasks'
+                    });
+                } else {
+                    const categories = [
+                        TASK_STATUSES.CATEGORIES.WORK,
+                        TASK_STATUSES.CATEGORIES.SPORT,
+                        TASK_STATUSES.CATEGORIES.STUDYING,
+                        TASK_STATUSES.CATEGORIES.HOBBY,
+                        TASK_STATUSES.CATEGORIES.OTHER
+                    ];
+
+                    const tasks = {
+                        [TASK_STATUSES.CATEGORIES.WORK]: [],
+                        [TASK_STATUSES.CATEGORIES.SPORT]: [],
+                        [TASK_STATUSES.CATEGORIES.STUDYING]: [],
+                        [TASK_STATUSES.CATEGORIES.HOBBY]: [],
+                        [TASK_STATUSES.CATEGORIES.OTHER]: []
+                    };
+
+                    resultsSnapshot.forEach((snap, index) => {
+                        if (!snap.empty) {
+                            snap.forEach(doc => {
+                                tasks[categories[index]].push({taskId: doc.id, ...doc.data()});
+                            });
+                        }
+                    });
+                    res.json(tasks);
+                }
             });
         }
     });
 });
-
 
 module.exports = router;

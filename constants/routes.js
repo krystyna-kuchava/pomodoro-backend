@@ -9,9 +9,9 @@ const ROUTES = {
         TASK_BY_ID: '/task/:taskId',
         TASKS_PERIOD_PRIORITY: '/tasks/:period/:priority',
         TASKS_PERIOD_CATEGORY: '/tasks/:period/:category',
-        TASKS_TODAY: '/tasks/today/:categoryId',
-        TASKS_GLOBAL: '/tasks/global/:categoryId',
-        TASKS_DONE: '/tasks/done/:categoryId',
+        TASKS_BY_STATUS: '/tasks/:status',
+        TASK_TODO: '/task/todo/:taskId',
+        TASK_DONE: '/task/done/:taskId'
     },
     SETTINGS: '/settings',
     CATEGORIES: '/categories',
