@@ -3,7 +3,8 @@ const TASK_STATUSES = {
         GLOBAL_LIST: 'GLOBAL_LIST',
         TODO_LIST: 'TODO_LIST',
         ACTIVE: 'ACTIVE',
-        DONE: 'DONE'
+        DONE: 'DONE_LIST',
+        FAILED: 'FAILED'
     },
     CATEGORIES: {
         WORK: '1',
@@ -11,6 +12,12 @@ const TASK_STATUSES = {
         STUDYING: '3',
         HOBBY: '4',
         OTHER: '5'
+    },
+    PRIORITIES: {
+        URGENT: '1',
+        HIGH: '2',
+        NORMAL: '3',
+        LOW: '4'
     }
 
 };

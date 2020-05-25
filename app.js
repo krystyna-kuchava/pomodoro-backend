@@ -60,6 +60,9 @@ app.use(routerUserService);
 const routerTaskService = require('./routes/task');
 app.use(routerTaskService);
 
+const routerReportService = require('./routes/report');
+app.use(routerReportService);
+
 
 app.listen(3030, () => {
     console.log('Server is up and listening on 3030...');

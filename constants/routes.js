@@ -16,6 +16,11 @@ const ROUTES = {
     SETTINGS: '/settings',
     CATEGORIES: '/categories',
     PRIORITIES: '/priorities',
+    REPORT: {
+        DAY: '/report/day',
+        WEEK: '/report/week',
+        MONTH: '/report/month'
+    }
 };
 
 module.exports = ROUTES;
