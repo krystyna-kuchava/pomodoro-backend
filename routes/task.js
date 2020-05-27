@@ -173,27 +173,34 @@ router.get(ROUTES.TASK.TASKS_BY_STATUS, verifyToken, (req, res) => {
         if (err) {
             res.sendStatus(STATUSES.FORBIDDEN);
         } else {
+            const userId = authData.id;
+
             const workTasks = db.collection(COLLECTIONS.TASKS)
+                .where('userId', '==', userId)
                 .where('status', '==', TASK_STATUSES.STATUSES[tasksStatus])
                 .where('categoryId', '==', TASK_STATUSES.CATEGORIES.WORK)
                 .get();
 
             const sportTasks = db.collection(COLLECTIONS.TASKS)
+                .where('userId', '==', userId)
                 .where('status', '==', TASK_STATUSES.STATUSES[tasksStatus])
                 .where('categoryId', '==', TASK_STATUSES.CATEGORIES.SPORT)
                 .get();
 
             const studyingTasks = db.collection(COLLECTIONS.TASKS)
+                .where('userId', '==', userId)
                 .where('status', '==', TASK_STATUSES.STATUSES[tasksStatus])
                 .where('categoryId', '==', TASK_STATUSES.CATEGORIES.STUDYING)
                 .get();
 
             const hobbyTasks = db.collection(COLLECTIONS.TASKS)
+                .where('userId', '==', userId)
                 .where('status', '==', TASK_STATUSES.STATUSES[tasksStatus])
                 .where('categoryId', '==', TASK_STATUSES.CATEGORIES.HOBBY)
                 .get();
 
             const otherTasks = db.collection(COLLECTIONS.TASKS)
+                .where('userId', '==', userId)
                 .where('status', '==', TASK_STATUSES.STATUSES[tasksStatus])
                 .where('categoryId', '==', TASK_STATUSES.CATEGORIES.OTHER)
                 .get();
@@ -230,6 +237,75 @@ router.get(ROUTES.TASK.TASKS_BY_STATUS, verifyToken, (req, res) => {
                     res.json(tasks);
                 }
             });
+        }
+    });
+});
+
+router.get(ROUTES.TASK.TASKS_TODO_LIST, verifyToken, (req, res) => {
+
+    jwt.verify(req.token, TOKEN_CONFIG.tokenType, (err, authData) => {
+        if (err) {
+            res.sendStatus(STATUSES.FORBIDDEN);
+        } else {
+            const userId = authData.id;
+            console.log(userId);
+
+            db.collection(COLLECTIONS.TASKS)
+                .where('userId', '==', userId)
+                .where('status', '==', TASK_STATUSES.STATUSES.TODO_LIST)
+                .get()
+                .then(resultsSnapshot => {
+                    if (resultsSnapshot.empty) {
+                        res.status(STATUSES.OK).send({
+                            successMessage: 'No tasks'
+                        });
+                    } else {
+                        const tasks = [];
+                        console.log(resultsSnapshot);
+                        resultsSnapshot.forEach((doc) => {
+                            console.log(doc.data());
+
+                            tasks.push({taskId: doc.id, ...doc.data()});
+                        });
+
+                        res.json(tasks);
+                    }
+                });
+        }
+    });
+});
+
+router.get(ROUTES.TASK.TASKS_DONE_LIST, verifyToken, (req, res) => {
+
+    jwt.verify(req.token, TOKEN_CONFIG.tokenType, (err, authData) => {
+        if (err) {
+            res.sendStatus(STATUSES.FORBIDDEN);
+        } else {
+            const userId = authData.id;
+            const tasks = [];
+
+            db.collection(COLLECTIONS.TASKS)
+                .where('userId', '==', userId)
+                .where('status', '==', TASK_STATUSES.STATUSES.DONE)
+                .get()
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        tasks.push({taskId: doc.id, ...doc.data()});
+                    });
+                })
+                .then(() => {
+                    db.collection(COLLECTIONS.TASKS)
+                        .where('userId', '==', userId)
+                        .where('status', '==', TASK_STATUSES.STATUSES.FAILED)
+                        .get()
+                        .then((querySnapshot) => {
+                            querySnapshot.forEach((doc) => {
+                                tasks.push({taskId: doc.id, ...doc.data()});
+                            });
+
+                            res.json(tasks);
+                        })
+                });
         }
     });
 });

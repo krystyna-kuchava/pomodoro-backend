@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const CryptoJS = require("crypto-js");
 const db = require('../services/firebase');
 const verifyToken = require('../token/verifyToken');
 const settingsService = require('../services/settings');
@@ -61,7 +62,8 @@ router.post(ROUTES.USER.SIGN_UP, (req, res) => {
 
 router.post(ROUTES.USER.LOGIN, (req, res) => {
     const email = req.body.email;
-    const password = req.body.password;
+    const password = req.body.encryptedPassword;
+    const encryptKey = req.body.encryptKey;
 
     db.collection(COLLECTIONS.USERS).where('email', '==', email).get().then((snapshot) => {
         if (snapshot.empty) {
@@ -73,7 +75,16 @@ router.post(ROUTES.USER.LOGIN, (req, res) => {
                 const user = doc.data();
                 const userId = doc.id;
 
-                if (user.password === password) {
+                var bytes  = CryptoJS.AES.decrypt(password, encryptKey);
+                var originalPassword = bytes.toString(CryptoJS.enc.Utf8);
+
+                //var bytes1  = CryptoJS.AES.decrypt(user.password, encryptKey);
+                //var originalPasswordFromDB = bytes1.toString(CryptoJS.enc.Utf8);
+
+                console.log(originalPassword);
+                console.log(originalPassword);
+
+                if (originalPassword == user.password) {
                     settingsService.linkSettingsOfUser(user).then((user) => {
                         jwt.sign({id: userId}, TOKEN_CONFIG.tokenType, {expiresIn: TOKEN_CONFIG.duration}, (err, token) => {
                             res.send({token, userId, userName: user.name});

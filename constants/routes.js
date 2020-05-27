@@ -11,7 +11,9 @@ const ROUTES = {
         TASKS_PERIOD_CATEGORY: '/tasks/:period/:category',
         TASKS_BY_STATUS: '/tasks/:status',
         TASK_TODO: '/task/todo/:taskId',
-        TASK_DONE: '/task/done/:taskId'
+        TASK_DONE: '/task/done/:taskId',
+        TASKS_TODO_LIST: '/tasks/list/todo-list',
+        TASKS_DONE_LIST: '/tasks/list/done-list',
     },
     SETTINGS: '/settings',
     CATEGORIES: '/categories',
@@ -19,7 +21,8 @@ const ROUTES = {
     REPORT: {
         DAY: '/report/day',
         WEEK: '/report/week',
-        MONTH: '/report/month'
+        MONTH: '/report/month',
+        MONTH_PRIORITY: '/report/month/priority/:priority',
     }
 };
 
