@@ -12,7 +12,8 @@ const TOKEN_CONFIG = require('../configs/tokenConfig');
 const router = express.Router();
 
 router.post(ROUTES.USER.SIGN_UP, (req, res) => {
-    const {email, password, name} = req.body;
+    const {email, name} = req.body;
+    const password = req.body.encryptedPassword;
 
     // check user with the same email
     db.collection(COLLECTIONS.USERS).where('email', '==', email).get().then((snapshot) => {
@@ -23,7 +24,7 @@ router.post(ROUTES.USER.SIGN_UP, (req, res) => {
             db.collection(COLLECTIONS.SETTINGS).add({...defaultSettings})
                 .then(ref => {
                     const settingsId = ref.id;
-                    const settings = db.collection(COLLECTIONS.USERS).doc(settingsId);
+                    const settings = db.collection(COLLECTIONS.SETTINGS).doc(settingsId);
 
                     // creating new user
                     db.collection(COLLECTIONS.USERS).add({email, password, name, settings})
@@ -75,16 +76,16 @@ router.post(ROUTES.USER.LOGIN, (req, res) => {
                 const user = doc.data();
                 const userId = doc.id;
 
-                var bytes  = CryptoJS.AES.decrypt(password, encryptKey);
-                var originalPassword = bytes.toString(CryptoJS.enc.Utf8);
+                const bytes  = CryptoJS.AES.decrypt(password, encryptKey);
+                const originalPassword = bytes.toString(CryptoJS.enc.Utf8);
 
-                //var bytes1  = CryptoJS.AES.decrypt(user.password, encryptKey);
-                //var originalPasswordFromDB = bytes1.toString(CryptoJS.enc.Utf8);
+                const bytes1  = CryptoJS.AES.decrypt(user.password, encryptKey);
+                const originalPasswordFromDB = bytes1.toString(CryptoJS.enc.Utf8);
 
                 console.log(originalPassword);
                 console.log(originalPassword);
 
-                if (originalPassword == user.password) {
+                if (originalPassword == originalPasswordFromDB) {
                     settingsService.linkSettingsOfUser(user).then((user) => {
                         jwt.sign({id: userId}, TOKEN_CONFIG.tokenType, {expiresIn: TOKEN_CONFIG.duration}, (err, token) => {
                             res.send({token, userId, userName: user.name});

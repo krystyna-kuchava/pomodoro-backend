@@ -122,12 +122,14 @@ router.put(ROUTES.TASK.TASK_DONE, verifyToken, (req, res) => {
             res.sendStatus(STATUSES.FORBIDDEN);
         } else {
             const taskId = req.params.taskId;
-
             const updatedTaskData = {
                 status: 'DONE_LIST'
             };
 
-            db.collection(COLLECTIONS.TASKS).doc(taskId).update(updatedTaskData).then(() => {
+            db.collection(COLLECTIONS.TASKS)
+                .doc(taskId)
+                .update(updatedTaskData)
+                .then(() => {
                 res.status(STATUSES.OK).send({
                     successMessage: 'Task was done'
                 });

@@ -66,16 +66,18 @@ function reportOfTasksForDayByPriorities(tasksOfDay) {
 
 function createArrayOfAllReports(tasks) {
     const dates = arrayOfDaysOfMonth();
+    const arrayOfReportsByDates = [];
 
     let tasksOfDay = [];
-    const arrayOfReportsByDates = [];
-    dates.map((date) => {  //go thought array of dates
-        tasksOfDay = tasks.filter(task => task.completeDay === date); //getData tasks of date
+
+    dates.map((date) => {
+        tasksOfDay = tasks.filter(task => task.completeDay === date);
         const reportTasks = reportOfTasksForDayByPriorities(tasksOfDay);
         const reportForDay = {
             date,
             reportTasks
         };
+
         //push report of one day into array of all days reports
         arrayOfReportsByDates.push(reportForDay);
     });
