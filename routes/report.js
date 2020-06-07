@@ -167,7 +167,6 @@ router.get(ROUTES.REPORT.MONTH_PRIORITY, verifyToken, (req, res) => {
                                         .where('status', '==', TASK_STATUSES.STATUSES.DONE)
                                         .get()
                                         .then((querySnapshot) => {
-                                            failedTasks = querySnapshot.size;
                                             finishedTasks += querySnapshot.size;
                                         })
                                         .then(() => {

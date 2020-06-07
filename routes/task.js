@@ -83,8 +83,7 @@ router.put(ROUTES.TASK.TASK_BY_ID, verifyToken, (req, res) => {
                 categoryId: req.body.categoryId,
                 priorityId: req.body.priorityId,
                 estimation: req.body.estimation,
-                deadlineDate: req.body.deadlineDate,
-                status: req.body.status
+                deadlineDate: req.body.deadlineDate
             };
 
             db.collection(COLLECTIONS.TASKS).doc(taskId).update(updatedTaskData).then(() => {
@@ -122,8 +121,11 @@ router.put(ROUTES.TASK.TASK_DONE, verifyToken, (req, res) => {
             res.sendStatus(STATUSES.FORBIDDEN);
         } else {
             const taskId = req.params.taskId;
+
             const updatedTaskData = {
-                status: 'DONE_LIST'
+                status: req.body.status,
+                failedPomodoros: req.body.failedPomodoros,
+                completeDay: req.body.completeDay
             };
 
             db.collection(COLLECTIONS.TASKS)

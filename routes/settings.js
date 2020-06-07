@@ -46,7 +46,11 @@ router.put(ROUTES.SETTINGS, verifyToken, (req, res) => {
 
                 user.settings.update(updatedSettingsData).then(() => {
                     settingsService.linkSettingsOfUser(user).then((user) => {
-                        res.json(user.settings);
+
+                        res.status(STATUSES.OK).send({
+                            settings: user.settings,
+                            successMessage: 'Settings were updated'
+                        });
                     });
                 });
             });
